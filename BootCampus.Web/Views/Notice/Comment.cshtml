@@ -1,0 +1,262 @@
+﻿@model BootCampus.Models.NoticeModel
+@{
+    ViewBag.Title = "Comment";
+}
+
+<div>
+    <h3>> 댓글</h3>
+    <!-- 댓글 입력창 -->
+    <div class="textarea-div">
+        <textarea rows="3" id="registerReply"></textarea>
+        <button class="reply-register-button" onclick="saveReply(@Model.notice.BOARD_SEQ)">등록</button>
+    </div>
+
+    <!-- v-for 댓글 -->
+    @foreach (var comment in Model.commentList)
+    {
+        <hr />
+        <div class="reply-contents">
+            @if (comment.LEVEL == 1)
+            {
+                <span>➥ </span>
+            }
+
+            <!-- 댓글 내용 -->
+            <span id="reply_@comment.REPLY_SEQ">
+                @comment.USER_NAME (@comment.CREATE_DATE)
+                @if (comment.LEVEL == 0)
+                {
+                    <button class="edit-button"
+                            onclick="openSecondReply(@comment.REPLY_SEQ)">
+                        답변
+                    </button>
+                }
+
+                @if (comment.USER_NAME == this.User.Identity.Name)
+                {
+                    <button class="edit-button"
+                            onclick="openEdit(@comment.REPLY_SEQ, '@comment.REPLY_CONTENTS')">
+                        편집
+                    </button>
+                    <button class="edit-button" onclick="deleteReply(@comment.REPLY_SEQ)">
+                        삭제
+                    </button>
+                }
+
+                <div>
+                    @if (comment.LEVEL == 0)
+                    {
+                        <p class="comment-contents">
+                            <strong>@comment.REPLY_CONTENTS</strong>
+                        </p>
+                    }
+                    else
+                    {
+                        <blockquote>
+                            <strong>@comment.REPLY_CONTENTS</strong>
+                        </blockquote>
+                    }
+                </div>
+            </span>
+
+            <!-- 댓글 편집창 -->
+            <span id="update_@comment.REPLY_SEQ" class="textarea-div none">
+                <textarea id="editReply_@comment.REPLY_SEQ"></textarea>
+                <button class="reply-edit-button"
+                        onclick="saveEditedReply(@comment.REPLY_SEQ)">
+                    등록
+                </button>
+            </span>
+        </div>
+
+        <!-- 대댓글 입력창 -->
+        <div id="second_@comment.REPLY_SEQ" class="textarea-div none">
+            <hr />
+            <div class="grid-reply">
+                <div>➥</div>
+                <div>
+                    <textarea placeholder="답변 입력란" id="registerSecond_@comment.REPLY_SEQ"></textarea>
+                    <button class="second-reply-button" onclick="saveSecondReply(@Model.notice.BOARD_SEQ, @comment.REPLY_SEQ)">
+                        등록
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+    <hr />
+</div>
+
+<script>
+    /**
+    * 댓글 내용 Null 체크
+    */
+    function checkReplyIsNull(reply) {
+        if (reply.trim() != null && reply.trim() != '') {
+            return true;
+        } else {
+            alert('댓글을 입력해주세요.');
+            return false;
+        }
+    }
+    /**
+     * 댓글 저장 메서드
+     */
+    function saveReply(id) {
+        var reply = $('#registerReply').val();
+        if (checkReplyIsNull(reply)) {
+            const DATA = {
+                BOARD_SEQ: id,
+                REPLY_CONTENTS: reply
+            }
+
+            return $.ajax({
+                type: 'POST',
+                url: COMMENT_URL + '/Create',
+                dataType: 'json',
+                async: false,
+                data: DATA,
+                success: function (result) {
+                    if (result.Success) {
+                        location.reload();
+                    } else {
+                        alert(result.Message)
+                    }
+                },
+                error: function (xhr) {
+                    alert(`[ERROR]\n${xhr.responseText}`);
+                }
+            }).responseJSON;
+        }
+    }
+
+    /**
+     * 편집/대댓글창 오픈 체크 메서드
+     */
+    function checkReplyOpen() {
+        if (editId > 0) {
+            $(`#update_${editId}`).addClass('none');
+            $(`#reply_${editId}`).removeClass('none');
+            $(`#editReply_${editId}`).val(editContents);
+            editId = 0;
+            editContents = null;
+        }
+
+        if (secondId > 0) {
+            $(`#second_${secondId}`).addClass('none');
+            $(`#registerSecond_${secondId}`).val(null);
+            secondId = 0;
+        }
+    }
+
+    /**
+     * 대댓글 입력창 오픈 메서드
+     */
+    function openSecondReply(id) {
+        checkReplyOpen();
+
+        $(`#second_${id}`).removeClass('none');
+        secondId = id;
+    }
+
+    /**
+     * 대댓글 저장 메서드
+     */
+    function saveSecondReply(boardId, replyId) {
+        var reply = $(`#registerSecond_${replyId}`).val();
+        if (checkReplyIsNull(reply)) {
+            const DATA = {
+                BOARD_SEQ: boardId,
+                PARENT_SEQ: replyId,
+                REPLY_CONTENTS: reply
+            }
+
+            return $.ajax({
+                type: 'POST',
+                url: COMMENT_URL + '/Create',
+                dataType: 'json',
+                async: false,
+                data: DATA,
+                success: function (result) {
+                    if (result.Success) {
+                        location.reload();
+                    } else {
+                        alert(result.Message)
+                    }
+                },
+                error: function (xhr) {
+                    alert(`[ERROR]\n${xhr.responseText}`);
+                }
+            }).responseJSON;
+        }
+    }
+
+    /**
+     * 편집창 오픈 메서드
+     */
+    function openEdit(id, contents) {
+        checkReplyOpen();
+
+        $(`#update_${id}`).removeClass('none');
+        $(`#reply_${id}`).addClass('none');
+        $(`#editReply_${id}`).val(contents);
+        editId = id;
+        editContents = contents;
+    }
+
+    /**
+     * 댓글 편집 메서드
+     */
+    function saveEditedReply(id) {
+        var reply = $(`#editReply_${id}`).val();
+        if (checkReplyIsNull(reply)) {
+            const DATA = {
+                REPLY_SEQ: id,
+                REPLY_CONTENTS: reply
+            }
+
+            return $.ajax({
+                type: 'POST',
+                url: COMMENT_URL + '/Update',
+                dataType: 'json',
+                async: false,
+                data: DATA,
+                success: function (result) {
+                    if (result.Success) {
+                        location.reload();
+                    } else {
+                        alert(result.Message)
+                    }
+                },
+                error: function (xhr) {
+                    alert(`[ERROR]\n${xhr.responseText}`);
+                }
+            }).responseJSON;
+        }
+    }
+
+    /**
+     * 댓글 삭제 메서드
+     */
+    function deleteReply(id) {
+        return $.ajax({
+            type: 'POST',
+            url: COMMENT_URL + '/Delete',
+            dataType: 'json',
+            async: false,
+            data: {
+                commentId: id
+            },
+            success: function (result) {
+                if (result.Success) {
+                    location.reload();
+                } else {
+                    alert(result.Message)
+                }
+            },
+            error: function (xhr) {
+                alert(`[ERROR]\n${xhr.responseText}`);
+            }
+        }).responseJSON;
+    }
+</script>
+

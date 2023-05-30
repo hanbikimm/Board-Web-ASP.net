@@ -1,0 +1,517 @@
+﻿/* 공통 */
+.txt-cent {
+    text-align: center;
+}
+
+.txt-left {
+    text-align: left;
+}
+
+.txt-right {
+    text-align: right;
+}
+
+button, .cursor {
+    cursor: pointer;
+}
+
+input[type=file] {
+    visibility: hidden;
+}
+
+body {
+    padding: 0px 0px;
+}
+
+.none {
+    display: none;
+}
+
+/* 로그인 */
+.login-table {
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+    border: none;
+    width: auto;
+}
+
+.login-table td {
+    border: none;
+    padding: 5px;
+}
+
+.login-content {
+    margin-top: 0px;
+    margin-left: 100px;
+    margin-right: 100px;
+    padding: 50px;
+}
+
+.login-input {
+    width: 200px;
+    padding: 4px;
+    font-size: 15px;
+    border: 1px solid #999;
+}
+
+.login-button {
+    margin-top: 2px;
+    padding: 3px;
+    width: 60px;
+}
+
+/* 목록 View */
+.grid-notice {
+    display: grid;
+    grid-template-columns: 350px auto;
+    gap: 10px;
+}
+
+.logout-button {
+    margin: 30px 0px 25px 5px;
+    width: 80px;
+}
+
+.logout-div {
+    display: flex;
+    justify-content: right;
+}
+
+.notice-content {
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+/* 검색 */
+.grid-search {
+    display: grid;
+    grid-template-columns: 100px 100px auto;
+    gap: 10px;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+.search-button {
+    cursor: pointer;
+    margin-left: 10px;
+    margin-top: 5px;
+    padding: 3px;
+    width: 50px;
+}
+
+select {
+    width: 100px;
+    padding: 4px;
+    border: 1px solid #999;
+    border-radius: 0px;
+    margin-top: 3px;
+}
+
+.search-input {
+    width: 200px;
+    padding: 4px;
+    border: 1px solid #999;
+    font-size: 14px;
+}
+
+.search-input-div {
+    padding-top: 18px;
+}
+
+/* 목록 */
+.notice-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.notice-table tr, td {
+    border: 1px solid #999;
+    padding: 5px;
+}
+
+.selected {
+    color: orangered;
+}
+
+.download-button {
+    padding: 4px;
+    margin-right: 10px;
+}
+
+.upload-button {
+    font-size: 13.9px;
+    background-color: #F0F0F0;
+    border: 1px solid rgb(122, 122, 122);
+    border-radius: 2px;
+    padding: 4px 6px 6px 6px;
+}
+
+.register-div {
+    display: flex;
+    justify-content: right;
+}
+
+.register-button {
+    padding: 4px;
+    margin-left: 120px;
+    width: 50px;
+    height: 30px;
+}
+
+.page-div {
+    display: flex;
+    justify-content: center;
+}
+
+.page-button {
+    border: none;
+    background-color: white;
+    padding: 6px;
+    border-radius: 2px;
+    width: 40px;
+    height: 30px;
+}
+
+.page-button:hover {
+    background: #e3e2e2;
+    cursor: pointer;
+}
+
+.grid-buttons {
+    display: grid;
+    width: 100%;
+    grid-template-columns: auto 400px auto;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* 상세 View */
+/* 상세 */
+.grid-detail {
+    display: grid;
+    grid-template-columns: 350px auto;
+    gap: 10px;
+}
+
+.nav-button {
+    margin: 30px 0px 25px 5px;
+    width: 70px;
+    padding: 6px 0px;
+}
+
+.status-button {
+    margin: 30px 0px 25px 5px;
+    width: 100px;
+    padding: 6px 0px;
+}
+
+.nav-div {
+    display: flex;
+    justify-content: right;
+}
+
+.detail-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.detail-table tr,td {
+    border: 1px solid #999;
+    padding: 5px;
+}
+
+.grid-contents {
+    display: grid;
+    grid-template-columns: 350px auto;
+    gap: 10px;
+}
+
+.detail-img-div {
+    width: 100%;
+}
+
+.detail-img {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+}
+
+.img-contents-div {
+    white-space: pre-line;
+    width: 100%;
+    height: 300px;
+    border: 1px solid #999;
+    overflow: auto;
+    padding: 0px 10px;
+    box-sizing: border-box;
+}
+
+.contents-div {
+    width: 100%;
+    border: 1px solid #999;
+    height: 300px;
+    padding: 0px 10px;
+    overflow: auto;
+    box-sizing: border-box;
+}
+
+/* 댓글 */
+.textarea-div {
+    width: 100%;
+    position: relative;
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid #999;
+    padding: 10px;
+    font-size: 15px;
+    resize: none;
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.edit-button {
+    margin-left: 7px;
+    padding: 0;
+    border: none;
+    text-decoration: underline;
+    color: cornflowerblue;
+    background-color: white;
+}
+
+.reply-edit-button {
+    padding: 5px 10px;
+    position: absolute;
+    top: -25px;
+    right: 20px;
+}
+
+.reply-register-button {
+    padding: 5px 10px;
+    position: absolute;
+    top: 30px;
+    right: 20px;
+}
+
+.second-reply-button {
+    padding: 5px 10px;
+    position: absolute;
+    top: 23px;
+    right: 20px;
+}
+
+.grid-reply {
+    display: grid;
+    width: 100%;
+    grid-template-columns: 30px auto;
+    gap: 0px;
+}
+
+.reply-contents {
+    margin: 10px 0px 10px 5px;
+}
+
+blockquote {
+    margin: 5px 0px 5px 21px;
+}
+
+.comment-contents {
+    margin: 5px;
+    text-indent: -3px;
+}
+
+/* 모달 */
+.modal-mask {
+    position: fixed;
+    z-index: 9998;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: table;
+    transition: opacity 0.3s ease;
+}
+
+.modal-wrapper {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.modal-container {
+    width: 300px;
+    margin: 0px auto;
+    padding: 20px 30px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+    transition: all 0.3s ease;
+    font-family: Helvetica, Arial, sans-serif;
+}
+.excel-modal-container {
+    width: 90%;
+    margin: 0px auto;
+    padding: 20px 30px;
+    background-color: #fff;
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
+    transition: all 0.3s ease;
+    font-family: Helvetica, Arial, sans-serif;
+}
+
+.modal-header h3 {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.modal-body {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.modal-default-button {
+    float: right;
+}
+
+.modal-enter {
+    opacity: 0;
+}
+
+.modal-leave-active {
+    opacity: 0;
+}
+
+.modal-enter .modal-container,
+.modal-leave-active .modal-container {
+    -webkit-transform: scale(1.1);
+    transform: scale(1.1);
+}
+
+.modal-button {
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+/* 등록/수정 View */
+.grid-handle {
+    display: grid;
+    grid-template-columns: 350px auto;
+    gap: 10px;
+}
+
+.nav-button {
+    margin: 30px 0px 25px 5px;
+    width: 70px;
+}
+
+.nav-div {
+    display: flex;
+    justify-content: right;
+}
+
+.handle-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.handle-table tr,td {
+    border: 1px solid #999;
+    padding: 5px;
+}
+
+.img-search-button {
+    margin-left: 10px;
+    font-size: 15px;
+    border: 1px solid rgb(69, 69, 189);
+    padding: 7px 10px;
+    border-radius: 2px;
+    color: white;
+    background-color: cornflowerblue;
+}
+
+.img-delete-button {
+    margin-left: 10px;
+    font-size: 15px;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 2px;
+    border: 1px solid cornflowerblue;
+    color: cornflowerblue;
+    background-color: white;
+}
+
+.grid-img {
+    display: grid;
+    grid-template-columns: 300px auto;
+    gap: 10px;
+    height: 300px;
+    align-items: center;
+}
+
+.select-img {
+    width: 280px;
+    height: 300px;
+    background-color: cornflowerblue;
+}
+
+.alert {
+    color: rgb(215, 4, 4);
+}
+
+.handle-input {
+    margin-left: 10px;
+    width: 50%;
+    padding: 6px;
+    border: 1px solid #999;
+    font-size: 15px;
+    background-color: white;
+}
+
+/* 상태 수정 모달 */
+.status-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.status-table th, td {
+    border: 1px solid black;
+    padding: 5px 40px 5px 5px;
+}
+
+.status-table tr {
+    text-align: left;
+}
+
+.status-button-div {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    margin-top: 20px;
+}
+
+/* 엑셀 목록 모달 */
+.excel-close-button {
+    padding: 6px 10px;
+    margin-top: 20px;
+}
+
+.excel-table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.excel-table tr, td {
+    border: 1px solid #999;
+    padding: 5px;
+}
+
+.excel-table-div {
+    overflow-y: auto;
+    height: 400px;
+}

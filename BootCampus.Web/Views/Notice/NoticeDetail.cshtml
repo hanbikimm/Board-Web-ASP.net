@@ -1,0 +1,242 @@
+﻿@model BootCampus.Models.NoticeModel
+@{
+    ViewBag.Title = "NoticeDetail";
+}
+
+<div class="notice-content">
+    <div>
+        <!-- 상단 헤더 -->
+        <div class="grid-detail">
+            <div>
+                <h1>> 게시글 상세</h1>
+            </div>
+            <div class="nav-div">
+                <button class="status-button" onclick="clickUpdateState()">
+                    상태 업데이트
+                </button>
+                @if (Model.notice.USER_NAME == this.User.Identity.Name)
+                {
+                    <button class="nav-button" onclick="goToHandle(@Model.notice.BOARD_SEQ)">수정</button>
+                    <button class="nav-button" onclick="clickDelete()">삭제</button>
+                }
+            </div>
+        </div>
+
+        <!-- 게시글 상세 -->
+        <div>
+            <table class="detail-table">
+                <tr>
+                    <td>제목</td>
+                    <td colspan="6">@Model.notice.TITLE</td>
+                </tr>
+                <tr>
+                    <td>작성자</td>
+                    <td>@Model.notice.USER_NAME</td>
+                    <td>작성일</td>
+                    <td>@Model.notice.WRITE_DATE</td>
+                    <td>조회수</td>
+                    <td>@Model.notice.VIEW_COUNT</td>
+                </tr>
+            </table>
+        </div>
+        @if (string.IsNullOrEmpty(Model.notice.FILE))
+        {
+            <div class="contents-div">
+                <p class="detail">
+                    @Model.notice.CONTENTS
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="grid-contents">
+                <div class="detail-img-div">
+                    <img class="detail-img" alt="이미지 미리보기" src="@Model.notice.FILE" />
+                </div>
+                <div class="img-contents-div">
+                    @Model.notice.CONTENTS
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- 삭제 확인창 -->
+    <transition id="confirm" class="none">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <slot name="header">
+                            <h3>삭제하시겠습니까?</h3>
+                        </slot>
+                    </div>
+                    <div class="modal-body">
+                        <slot name="body">
+                            <button class="modal-button" onclick="clickConfirm(@Model.notice.BOARD_SEQ)">확인</button>
+                            <button class="modal-button" onclick="clickCancel()">취소</button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- 상태 업데이트창 -->
+    <transition id="updateState" class="none">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <slot name="header">
+                            <h3>상태 업데이트</h3>
+                        </slot>
+                    </div>
+                    <div class="modal-body">
+                        <slot name="body">
+                            <table class="status-table">
+                                <tr>
+                                    <td>현재 상태</td>
+                                    <td>@Model.notice.STATE</td>
+                                </tr>
+                                <tr>
+                                    <td>변경상태</td>
+                                    <td>
+                                        <select id="newState">
+                                            @foreach(var state in ViewBag.stateList)
+                                            {
+                                                <option value="@state.VALUE">@state.TEXT</option>
+                                            }
+                                        </select>
+                                    </td>
+                                </tr>
+                            </table>
+                            <div class="status-button-div">
+                                <button onclick="clickEdit(@Model.notice.BOARD_SEQ, '@Model.notice.STATE')">수정</button>
+                            </div>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+
+
+    @Html.Partial("Comment", Model)
+
+</div>
+
+<script>
+    const NOTICE_URL = '/Notice';
+    const COMMENT_URL = '/Comment';
+
+    var secondId = 0;
+    var editId = 0;
+    var editContents = null;
+
+    /**
+     * 게시글 수정 화면 이동 메서드
+     */
+    function goToHandle(id) {
+        location.href = NOTICE_URL + '/NoticeHandle?boardID=' + id;
+    }
+
+    /**
+     * 삭제 모달 오픈 메서드
+     */
+    function clickDelete() {
+        $('#confirm').toggleClass('none');
+    }
+
+    /**
+     * 삭제 모달 닫는 메서드
+     */
+    function clickCancel() {
+        $('#confirm').toggleClass('none');
+    }
+
+    /**
+     * 게시글 삭제 메서드
+     */
+    function clickConfirm(id) {
+        $('#confirm').toggleClass('none');
+        return $.ajax({
+            type: 'POST',
+            url: NOTICE_URL + '/Delete',
+            dataType: 'json',
+            async: false,
+            data: {
+                boardId: id
+            },
+            success: function (result) {
+                if (result.Success) {
+                    alert(result.Message);
+                    location.href = NOTICE_URL + '/NoticeList';
+                } else {
+                    alert(result.Message)
+                }
+            },
+            error: function (xhr) {
+                alert(`[ERROR]\n${xhr.responseText}`);
+            }
+        }).responseJSON;
+    }
+
+    /**
+     * 상태 수정창 오픈 메서드
+     */
+    function clickUpdateState() {
+        $('#updateState').toggleClass('none');
+    }
+
+    /**
+     * 상태값 문자열 변환 메서드
+     */
+    function changeState(stateNum) {
+        result = '';
+        if (stateNum == 1) {
+            result = '오픈';
+        } else if (stateNum == 2) {
+            result = '접수됨';
+        } else if (stateNum == 3) {
+            result = '진행중';
+        } else if (stateNum == 4) {
+            result = '완료됨';
+        }
+
+        return result;
+    }
+
+    /**
+     * 상태 수정 메서드
+     */
+    function clickEdit(boardId, state) {
+        var newState = changeState($('#newState option:selected').val());
+        if (newState != '' && newState != state) {
+            $.ajax({
+                type: 'POST',
+                url: NOTICE_URL + '/State',
+                dataType: 'json',
+                async: false,
+                data: {
+                    notice: {
+                        BOARD_SEQ: boardId,
+                        STATE: newState
+                    }
+                },
+                success: function (result) {
+                    if (result.Success) {
+                        location.reload();
+                    } else {
+                        alert(result.Message);
+                    }
+                },
+                error: function (xhr) {
+                    alert(`[ERROR]\n${xhr.responseText}`);
+                }
+            }).responseJSON;
+        }
+        $('#newState').val('0').prop('selected', true);
+        $('#updateState').toggleClass('none');
+    }
+</script>

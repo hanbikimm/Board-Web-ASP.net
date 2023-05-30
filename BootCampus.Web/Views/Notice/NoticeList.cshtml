@@ -1,0 +1,303 @@
+﻿@model BootCampus.Models.NoticeModel
+@{
+    ViewBag.Title = "NoticeList";
+}
+
+<div class="notice-content">
+    <div class="grid-notice">
+        <div>
+            <h1>> Q&A 게시판</h1>
+        </div>
+        @using (Html.BeginForm("Logout", "Member", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <div class="logout-div">
+                <button class="logout-button" type="submit">로그아웃</button>
+            </div>
+        }
+
+    </div>
+
+    <!-- 검색 -->
+    @using (Html.BeginForm("NoticeList", "Notice", FormMethod.Get, new { id = "formSearch" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="grid-search">
+            <div>
+                <label>상태</label>
+                <br />
+                @Html.DropDownListFor(m => m.condition.STATE, new SelectList(ViewBag.stateList, "VALUE", "TEXT"))
+            </div>
+
+            <div>
+                <label>검색조건</label>
+                <br />
+                @Html.DropDownListFor(m => m.condition.SEARCH_TYPE, new SelectList(ViewBag.typeList, "VALUE", "TEXT"))
+            </div>
+
+            <div class="search-input-div">
+                @Html.TextBoxFor(m => m.condition.SEARCH_WORD, new { @class = "search-input" })
+                <button class="search-button" onclick="searchList()">검색</button>
+            </div>
+
+            @Html.HiddenFor(m => m.condition.PAGE, new { id = "search-page" })
+        </div>
+    }
+
+    <!-- notice 목록 -->
+    <div>
+        <div>
+            <table class="notice-table">
+                <thead class="txt-cent">
+                    <tr>
+                        <td>번호</td>
+                        <td>상태</td>
+                        <td>제목</td>
+                        <td>작성자</td>
+                        <td>작성일</td>
+                        <td>조회수</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var data in Model.noticeList)
+                    {
+                        <tr>
+                            <td class="txt-cent"> @data.BOARD_SEQ </td>
+                            <td class="txt-left"> @data.STATE </td>
+                            <td class="cursor txt-left" onclick="goToDetail(@data.BOARD_SEQ)">
+                                @data.TITLE  <strong>[ @data.REPLY_COUNT ]</strong>
+                            </td>
+                            <td class="txt-cent"> @data.USER_NAME </td>
+                            <td class="txt-cent"> @data.WRITE_DATE </td>
+                            <td class="txt-cent"> @data.VIEW_COUNT </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 목록 하단 버튼 -->
+        <div class="grid-buttons">
+            <div>
+                <button class="download-button"
+                        onclick="clickDownload()">
+                    엑셀 다운로드
+                </button>
+                <span class="upload-button">
+                    <label class="cursor" for="selectExcel"> 엑셀 업로드 </label>
+                </span>
+                <input type="file"
+                       id="selectExcel"
+                       class="none"
+                       accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                       onchange="uploadExcel(event)" />
+            </div>
+
+            <!-- 페이징 -->
+            <div class="page-div">
+                <button class="page-button" onclick="clickPage(@Model.condition.PAGE -1)">이전</button>
+                @foreach (var page in Model.PAGES)
+                {
+                    if (page == Model.condition.PAGE)
+                    {
+                        <button class="page-button selected"
+                                onclick="clickPage(@page)">
+                            @page
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="page-button"
+                                onclick="clickPage(@page)">
+                            @page
+                        </button>
+                    }
+
+                }
+
+                <button class="page-button" onclick="clickPage(@Model.condition.PAGE +1)">다음</button>
+            </div>
+
+
+            <!-- 작성버튼 -->
+            <div class="register-div">
+                <button class="register-button" onclick="goToHandle()">작성</button>
+            </div>
+        </div>
+    </div>
+
+    <transition name="modal" id="excelList" class="none">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="excel-modal-container">
+                    <div class="modal-header">
+                        <button class="excel-close-button" onclick="clickClose()">X</button>
+                        <slot name="header">
+                            <!-- 헤더 -->
+                            <h3>엑셀 업로드 데이터</h3>
+                        </slot>
+                    </div>
+                    <div class="modal-body">
+                        <!-- 바디 -->
+                        <slot name="body">
+                            <div class="excel-table-div">
+                                <!-- notice 목록 -->
+                                <table class="excel-table">
+                                    <thead class="txt-cent">
+                                        <tr>
+                                            <td>번호</td>
+                                            <td>상태</td>
+                                            <td>제목</td>
+                                            <td>작성자</td>
+                                            <td>작성일</td>
+                                            <td>조회수</td>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="excelData">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+</div>
+
+<script>
+    const URL = '/Notice'
+
+    /**
+     * 검색 메서드
+     * 페이지를 1로 초기화하고 검색 실행
+     */
+    function searchList() {
+        $('#search-page').val(1);
+        $('#formSearch').submit();
+    }
+
+    /**
+     * 페이지 이동 메서드
+     */
+    function clickPage(page) {
+        if (page == 0) {
+            alert('첫번째 페이지입니다.');
+        } else if (page > @Model.TOTAL_PAGE) {
+            alert('마지막 페이지입니다.');
+        } else {
+            $('#search-page').val(page);
+            $('#formSearch').submit();
+        }
+    }
+
+    /**
+     * 상세 조회 화면 이동 메서드
+     * 조회수 증가 성공시 상세 화면으로 이동
+     */
+    function goToDetail(id) {
+        return $.ajax({
+            type: 'POST',
+            url: URL + '/ViewCount',
+            dataType: 'json',
+            async: false,
+            data: {
+                boardId: id
+            },
+            success: function (result) {
+                if (result.Success) {
+                    location.href = URL + '/NoticeDetail?boardID=' + id;
+                } else {
+                    alert(result.Message)
+                }
+            },
+            error: function (xhr) {
+                alert(`[ERROR]\n${xhr.responseText}`);
+            }
+        }).responseJSON;
+    }
+
+    /**
+     * 작성 화면 이동 메서드
+     * 수정화면인지 구분하기 위해 id 0으로 세팅
+     */
+    function goToHandle() {
+        location.href = URL + '/NoticeHandle?boardID=0';
+    }
+
+    /**
+     * 엑셀 다운로드 메서드
+     */
+    function clickDownload() {
+        const DATA = {
+            STATE: @Model.condition.STATE,
+            SEARCH_TYPE: @Model.condition.SEARCH_TYPE,
+            SEARCH_WORD: '@Model.condition.SEARCH_WORD',
+            PAGE: @Model.condition.PAGE,
+        }
+
+        return $.ajax({
+            type: 'GET',
+            url: URL + '/ExcelDownLoad',
+            data: DATA,
+            xhrFields: {
+                responseType: 'blob',
+            },
+            success: function (result, status, xhr) {
+                var file = window.URL.createObjectURL(new Blob([result]));
+                var fileName = xhr.getResponseHeader('content-disposition');
+                fileName = fileName.substring(fileName.indexOf('=') + 1);
+
+                var link = document.createElement('a');
+                link.href = file;
+                link.download = fileName;
+                link.click();
+                link.remove();
+            },
+            error: function (xhr) {
+                alert(`[ERROR]\n${xhr.responseText}`);
+            }
+        });
+    }
+
+    /**
+     * 엑셀 업로드 메서드
+     */
+    function uploadExcel(event) {
+        //1) 선택된 파일을 저장
+        const FILE = event.target.files[0];
+        var reader = new FileReader();
+        reader.onload = () => {
+            var data = reader.result;
+            //3) 데이터를 arrayBuffer -> excel -> json 순으로 변환 후 데이터에 담음
+            const WORKBOOK = XLSX.read(data, {type: 'binary'});
+            const RESULT = XLSX.utils.sheet_to_json(WORKBOOK.Sheets['Notice']);
+            for (data of RESULT) {
+                makeNoticeElement(data);
+            }
+        };
+        //2) 파일을 arraybuffer로 변환
+        reader.readAsBinaryString(FILE);
+        // 모달 오픈
+        $('#excelList').removeClass('none');
+    }
+
+    /**
+     * 엑셀 업로드 모달 닫는 메서드
+     */
+    function clickClose() {
+        $('#excelList').addClass('none');
+    }
+
+    function makeNoticeElement(notice) {
+        $('#excelData').append(`<tr id="${notice.BOARD_SEQ}"></tr>`);
+        $(`#${notice.BOARD_SEQ}`).append(`<td class="txt-cent">${notice.BOARD_SEQ}</td>`);
+        $(`#${notice.BOARD_SEQ}`).append(`<td class="txt-left">${notice.STATE}</td>`);
+        $(`#${notice.BOARD_SEQ}`).append(`<td id="TITLE_${notice.BOARD_SEQ}" class="txt-left">${notice.TITLE}</td>`);
+        $(`#TITLE_${notice.BOARD_SEQ}`).append(`<strong>${notice.REPLY_COUNT}</strong>`);
+        $(`#${notice.BOARD_SEQ}`).append(`<td class="txt-cent">${notice.USER_NAME}</td>`);
+        $(`#${notice.BOARD_SEQ}`).append(`<td class="txt-cent">${notice.WRITE_DATE}</td>`);
+        $(`#${notice.BOARD_SEQ}`).append(`<td class="txt-cent">${notice.VIEW_COUNT}</td>`);
+    }
+</script>

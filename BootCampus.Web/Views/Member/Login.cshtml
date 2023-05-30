@@ -1,0 +1,35 @@
+﻿@model BootCampus.Models.MemberModel
+@{
+    ViewBag.Title = "Login";
+}
+
+<div class="login-content">
+    <h1 class="txt-cent">로그인</h1>
+    <div>
+        @using (Html.BeginForm("Login", "Member", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+            <table class="login-table">
+                <tr>
+                    <td>아이디</td>
+                    <td>
+                        @Html.TextBoxFor(m => m.member.USER_ID, new { @class = "login-input" })
+                    </td>
+                </tr>
+                <tr>
+                    <td>패스워드</td>
+                    <td>
+                        @Html.PasswordFor(m => m.member.USER_PW, new { @class = "login-input" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="txt-right" colspan="2">
+                        <button type="submit" class="login-button">로그인</button>
+                    </td>
+                </tr>
+            </table>
+        }
+    </div>
+    <p class="txt-cent">@Html.ValidationMessage("LoginError")</p>
+</div>
+

@@ -1,0 +1,232 @@
+﻿@model BootCampus.Models.NoticeModel
+@{
+    ViewBag.Title = "NoticeHandle";
+}
+
+<div class="notice-content">
+    <!-- 상단 헤더 -->
+    <div class="grid-handle">
+        <div>
+            <h1>> 게시글 @ViewBag.viewType</h1>
+        </div>
+        <div class="nav-div">
+            <button class="nav-button" onclick="goToNotice()">목록</button>
+            <button class="nav-button" onclick="clickRegister()">등록</button>
+        </div>
+    </div>
+
+    <!-- 게시글 내용 수정 -->
+    <div>
+        <p id="alert" class="alert none">제목은 필수 입력사항입니다.</p>
+        <table class="handle-table">
+            <tr>
+                <td>제목</td>
+                <td colspan="5">
+                    @Html.TextBoxFor(m => m.notice.TITLE, new { id = "title", @class = "handle-input", placeholder = "제목 입력란" })
+                </td>
+            </tr>
+            <tr>
+                <td>작성자</td>
+                <td>@this.User.Identity.Name</td>
+                <td>작성일</td>
+                <td>@ViewBag.date</td>
+            </tr>
+        </table>
+
+        @Html.TextAreaFor(m => m.notice.CONTENTS, new { id = "contents", @class = "notice-textarea", rows = "6", placeholder = "내용 입력란" })
+    </div>
+
+    <!-- 이미지 첨부 -->
+    <div>
+        <h2>> 이미지 첨부하기</h2>
+        <div class="grid-img">
+            <div>
+                <img class="select-img" id="file" src="@Model.notice.FILE" />
+            </div>
+            <div>
+                @Html.TextBoxFor(m => m.notice.FILE_NAME, new { id = "fileName", @class = "handle-input", disabled = "disabled" })
+                <span class="img-search-button">
+                    <label class="cursor" for="selectFile"> 찾아보기 </label>
+                </span>
+                <input type="file"
+                       id="selectFile"
+                       class="none"
+                       accept="image/*"
+                       onchange="selectFile(event)" />
+                <button onclick="removeFile()" class="img-delete-button">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 등록/수정 확인창 -->
+    <transition id="confirm" class="none">
+        <div class="modal-mask">
+            <div class="modal-wrapper">
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <slot name="header">
+                            <h3>@ViewBag.message</h3>
+                        </slot>
+                    </div>
+                    <div class="modal-body">
+                        <slot name="body">
+                            <button class="modal-button" onclick="clickConfirm(@Model.notice.BOARD_SEQ)">확인</button>
+                            <button class="modal-button" onclick="clickCancel()">취소</button>
+                        </slot>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+</div>
+
+<script>
+    const URL = '/Notice'
+    var file = '@Model.notice.FILE' //선택된 이미지 바이너리 파일
+
+    /**
+     * 목록 이동 메서드
+     */
+    function goToNotice() {
+        location.href = URL + '/NoticeList';
+    }
+
+    /**
+     * 등록버튼 클릭 메서드
+     * 클릭 시 제목이 Null이 아닌지 체크하고 확인창 띄움
+     */
+    function clickRegister() {
+        if ($('#title').val().trim() == '') {
+            $('#alert').removeClass('none');
+        } else {
+            $('#alert').addClass('none');
+            $('#confirm').removeClass('none');
+        }
+    }
+
+    /**
+     * 확인창 취소버튼 클릭 메서드
+     * 확인창 모달 닫음
+     */
+    function clickCancel() {
+        $('#confirm').addClass('none');
+    }
+
+    /**
+     * 확인창 확인버튼 클릭 메서드
+     * 클릭 시 id값에 따라 게시글 생성/수정함
+     */
+    function clickConfirm(id) {
+        if (id == 0) {
+            registerNotice();
+        } else {
+            modifyNotice();
+        }
+    }
+
+    /**
+     * 이미지 파일 선택 메서드
+     */
+    function selectFile(event) {
+        const FILE = event.target.files[0];
+        var fileType = FILE.type;
+        if (this.checkFileType(fileType)) {
+            //선택된 파일의 이름을 저장
+            $('#fileName').val(FILE.name);
+            var reader = new FileReader();
+            reader.onload = (e) => {
+                $('#file').attr('src', e.target.result);
+                file = e.target.result;
+            };
+            //선택된 파일을 base64 인코딩해주고, 결과를 저장
+            reader.readAsDataURL(FILE);
+        }
+        //선택된 파일값 초기화
+        event.target.value = '';
+    }
+
+    /**
+     * 선택 파일 삭제 메서드
+     */
+    function removeFile() {
+        $('#fileName').val('');
+        file = null;
+        $('#file').removeAttr('src');
+    }
+
+    /**
+     * 파일 확장자 체크 메서드
+     */
+    function checkFileType(fileType){
+        if (!fileType.includes('image')) {
+            alert('이미지 파일만 등록 가능합니다.');
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    /**
+     * notice 등록 메서드
+     */
+    function registerNotice() {
+        const DATA = {
+            TITLE: $('#title').val(),
+            CONTENTS: $('#contents').val(),
+            FILE_NAME: $('#fileName').val(),
+            FILE: file
+        }
+        return $.ajax({
+            type: 'POST',
+            url: URL + '/Create',
+            dataType: 'json',
+            async: false,
+            data: DATA,
+            success: function (result) {
+                if (result.Success) {
+                    $('#confirm').addClass('none');
+                    alert(result.Message);
+                    location.href = URL + '/NoticeList';
+                } else {
+                    alert(result.Message);
+                }
+            },
+            error: function (xhr) {
+                alert(`[ERROR]\n${xhr.responseText}`);
+            }
+        });
+    }
+
+    /**
+     * notice 수정 메서드
+     */
+    function modifyNotice() {
+        const DATA = {
+            BOARD_SEQ: @Model.notice.BOARD_SEQ,
+            TITLE: $('#title').val(),
+            CONTENTS: $('#contents').val(),
+            FILE_NAME: $('#fileName').val(),
+            FILE: file
+        }
+        return $.ajax({
+            type: 'POST',
+            url: URL + '/Update',
+            dataType: 'json',
+            async: false,
+            data: DATA,
+            success: function (result) {
+                if (result.Success) {
+                    $('#confirm').addClass('none');
+                    alert(result.Message);
+                    location.href = URL + '/NoticeList';
+                } else {
+                    alert(result.Message);
+                }
+            },
+            error: function (xhr) {
+                alert(`[ERROR]\n${xhr.responseText}`);
+            }
+        }).responseJSON;
+    }
+</script>
